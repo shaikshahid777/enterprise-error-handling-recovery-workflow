@@ -1,0 +1,111 @@
+{
+  "name": "Global Error Handler",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "618b80dc-62d5-4f1f-9beb-fb39ee92bf2c",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO system_error_logs\n  (execution_id, workflow_id, workflow_name, failed_node, error_message, occurred_at)\nVALUES ($1, $2, $3, $4, $5, NOW())\nRETURNING *;",
+        "options": {
+          "queryReplacement": "={{ [ ($json.execution && $json.execution.id) || $execution.id, $json.workflow.id, $json.workflow.name, ($json.execution && $json.execution.error && $json.execution.error.node ? $json.execution.error.node.name : \"unknown\"), ($json.execution && $json.execution.error ? $json.execution.error.message : \"unknown error\") ] }}"
+        }
+      },
+      "id": "a2dbbb66-225b-4b10-9777-55844f05e575",
+      "name": "PostgreSQL_LogError",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        224,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "NxoTycunkgjzK2cK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "",
+          "cachedResultName": "Select operational alerts channel"
+        },
+        "text": "=:rotating_light: *Workflow Failure Alert*\n*Workflow Name:* {{ $json.workflow.name }}\n*Workflow ID:* {{ $json.workflow.id }}\n*Execution ID:* {{ ($json.execution && $json.execution.id) || $execution.id }}\n*Failed Node:* {{ $json.execution && $json.execution.error && $json.execution.error.node ? $json.execution.error.node.name : \"unknown\" }}\n*Error Message:* {{ $json.execution && $json.execution.error ? $json.execution.error.message : \"unknown error\" }}\n*Execution URL:* {{ ($json.execution && $json.execution.url) || \"n/a\" }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": true
+        }
+      },
+      "id": "5152a985-5af4-43cf-a5b7-91cbefad06c5",
+      "name": "Slack_DispatchAlert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        480,
+        48
+      ],
+      "webhookId": "6de6f696-8f64-453f-8d9a-e67351374682",
+      "disabled": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL_LogError",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL_LogError": {
+      "main": [
+        [
+          {
+            "node": "Slack_DispatchAlert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e95b499b-a80a-4a98-8c45-4acdc1fdb8b9",
+  "meta": {
+    "instanceId": "201381d913fa9e78389f7093cb99cedc70c766251a500f897db19feccfda3bd0"
+  },
+  "nodeGroups": [
+    {
+      "id": "59eb0cb7-4811-4eff-abe9-7e11d539e212",
+      "name": "Centralized Recovery",
+      "nodeIds": [
+        "a2dbbb66-225b-4b10-9777-55844f05e575",
+        "5152a985-5af4-43cf-a5b7-91cbefad06c5"
+      ],
+      "description": "Persists a structured failure record in PostgreSQL, then dispatches a Slack operational alert with full execution metadata."
+    }
+  ],
+  "id": "D0d9aJ0shzJxB9Pj",
+  "tags": []
+}

@@ -1,0 +1,63 @@
+{
+  "name": "Setup - Create system_error_logs",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "be0bd72c-bdcb-48b7-ba01-9157d15a997c",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "CREATE TABLE IF NOT EXISTS system_error_logs (\n  id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,\n  execution_id  TEXT        NOT NULL,\n  workflow_id   TEXT        NOT NULL,\n  workflow_name TEXT        NOT NULL,\n  failed_node   TEXT,\n  error_message TEXT,\n  occurred_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()\n);\nCREATE INDEX IF NOT EXISTS idx_system_error_logs_workflow_id ON system_error_logs (workflow_id);\nCREATE INDEX IF NOT EXISTS idx_system_error_logs_occurred_at ON system_error_logs (occurred_at DESC);",
+        "options": {}
+      },
+      "id": "b51d699f-4c4a-448b-b5e3-97ebe34fa938",
+      "name": "Create system_error_logs",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        224,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "NxoTycunkgjzK2cK",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Create system_error_logs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "83e76c46-f036-47da-a35b-014b267b2820",
+  "meta": {
+    "instanceId": "201381d913fa9e78389f7093cb99cedc70c766251a500f897db19feccfda3bd0"
+  },
+  "nodeGroups": [],
+  "id": "JxRk7G8mhqYSfg4O",
+  "tags": []
+}

@@ -1,0 +1,99 @@
+{
+  "name": "Primary Business Workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "45595835-c9b3-4987-bd32-e82848299390",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://httpbin.org/status/500",
+        "options": {
+          "response": {
+            "response": {}
+          },
+          "timeout": 10000
+        }
+      },
+      "id": "368359ca-9576-4be3-9350-85b59e71bf31",
+      "name": "HTTP_CallBusinessAPI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        224,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "status",
+              "name": "status",
+              "type": "string",
+              "value": "success"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bfca998e-c423-4a2e-a43f-6ff19e1902fb",
+      "name": "Process_SuccessfulResponse",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        448,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP_CallBusinessAPI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP_CallBusinessAPI": {
+      "main": [
+        [
+          {
+            "node": "Process_SuccessfulResponse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "errorWorkflow": "D0d9aJ0shzJxB9Pj"
+  },
+  "versionId": "ace0930b-576b-4665-9028-7e605b742a65",
+  "meta": {
+    "instanceId": "201381d913fa9e78389f7093cb99cedc70c766251a500f897db19feccfda3bd0"
+  },
+  "nodeGroups": [],
+  "id": "9Tlg7VeOcc3msrzm",
+  "tags": []
+}
